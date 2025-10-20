@@ -15,3 +15,5 @@
 ._*
 *~
 .vscode/
+.venv/
+_minted-atelier_vr/

@@ -3,26 +3,18 @@
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage{hyperref}
-\usepackage{listings}
-\usepackage{color}
+\usepackage{xcolor}
+\usepackage{minted}
+\usemintedstyle{friendly}
+% Default minted settings for code blocks: encadrer les blocs et fond léger
+\definecolor{codebg}{RGB}{250,250,250}
+\definecolor{coderule}{RGB}{200,200,200}
+% Options: frame=single ajoute une bordure, bgcolor définit le fond, rulecolor pour la bordure
+\setminted{fontsize=\small,breaklines=true,linenos=false,autogobble=true,encoding=utf8,frame=single,bgcolor=codebg,rulecolor=coderule}
 \usepackage{geometry}
 \geometry{a4paper, margin=1in}
 
-\lstset{
-  basicstyle=\ttfamily,
-  numbers=none,
-  numberstyle=\tiny,
-  frame=single,
-  breaklines=true,
-  columns=fullflexible,
-  showspaces=false,
-  showstringspaces=false,
-  keepspaces=true,
-  literate={é}{{\'e}}1 {è}{{\`e}}1 {à}{{\`a}}1 {ç}{{\c{c}}}1 {ê}{{\^e}}1
-           {î}{{\^i}}1 {ô}{{\^o}}1 {û}{{\^u}}1 {ë}{{\¨e}}1 {ï}{{\¨i}}1
-           {ü}{{\¨u}}1 {œ}{{\oe}}1 {Œ}{{\OE}}1 {Ç}{{\c{C}}}1
-           {<}{{$<$}}1 {>}{{$>$}}1 {&}{{\&}}1
-}
+% Using minted for syntax highlighting instead of listings
 
 \title{Atelier Découverte de la VR Interactive}
 \author{Théo AVRIL}
@@ -55,7 +47,7 @@ Ce tutoriel vous permettra de :
 \subsection{Structure de Base}
 Copiez-collez le code suivant dans votre fichier \texttt{index.html} :
 
-\begin{lstlisting}[language=HTML]
+\begin{minted}{html}
 <!DOCTYPE html>
 <html>
   <head>
@@ -68,13 +60,13 @@ Copiez-collez le code suivant dans votre fichier \texttt{index.html} :
     <!-- La scène VR sera définie ici -->
   </body>
 </html>
-\end{lstlisting}
+\end{minted}
 
 \section{Étape 2 : Créer une Scène VR de Base}
 \subsection{Ajouter la Scène et des Objets}
 Dans la balise \texttt{<body>}, ajoutez la balise \texttt{<a-scene>} avec le contenu suivant :
 
-\begin{lstlisting}[language=HTML]
+\begin{minted}{html}
 <body>
   <a-scene>
     <!-- Cube interactif : clic pour changer de couleur -->
@@ -95,7 +87,7 @@ Dans la balise \texttt{<body>}, ajoutez la balise \texttt{<a-scene>} avec le con
     <a-sky color="#ECECEC"></a-sky>
   </a-scene>
 </body>
-\end{lstlisting}
+\end{minted}
 
 \subsection{Explications}
 \begin{itemize}
@@ -112,7 +104,7 @@ Nous allons créer un composant AFrame nommé \texttt{change-color-on-click} qui
 \subsection{Ajouter le Script JavaScript}
 Ajoutez le code suivant juste avant la fermeture de la balise \texttt{</body>} :
 
-\begin{lstlisting}[language=HTML]
+\begin{minted}{html}
 <!-- Script JavaScript pour ajouter l'interactivité -->
 <script>
   // Enregistrement d'un composant personnalisé "change-color-on-click"
@@ -128,7 +120,7 @@ Ajoutez le code suivant juste avant la fermeture de la balise \texttt{</body>} :
     }
   });
 </script>
-\end{lstlisting}
+\end{minted}
 
 \subsection{Explications}
 \begin{itemize}
@@ -159,7 +151,7 @@ Cette section vous propose une documentation rapide des commandes et attributs l
 
 \subsection{Formes et Objets 3D de Base}
 
-\begin{lstlisting}[language=HTML]
+\begin{minted}{html}
 <!-- Formes primitives -->
 <a-box>          <!-- Un cube ou parallelepipede -->
 <a-sphere>       <!-- Une sphere -->
@@ -171,13 +163,13 @@ Cette section vous propose une documentation rapide des commandes et attributs l
 <a-circle>       <!-- Un cercle plat -->
 <a-triangle>     <!-- Un triangle plat -->
 <a-sky>          <!-- Un ciel spherique (environnement) -->
-\end{lstlisting}
+\end{minted}
 
 \subsection{Attributs Communs}
 
 Ces attributs peuvent être appliqués à la plupart des objets :
 
-\begin{lstlisting}[language=HTML]
+\begin{minted}{html}
 <!-- Position, Rotation, et Echelle -->
 position="x y z"     <!-- Position en metres (x: gauche/droite, y: haut/bas, z: avant/arriere) -->
 rotation="x y z"     <!-- Rotation en degres (autour des axes x, y, z) -->
@@ -195,11 +187,11 @@ width="2"            <!-- Largeur (pour box, plane, etc.) -->
 height="1"           <!-- Hauteur (pour box, plane, etc.) -->
 depth="0.5"          <!-- Profondeur (pour box) -->
 radius="1.5"         <!-- Rayon (pour sphere, cylinder, etc.) -->
-\end{lstlisting}
+\end{minted}
 
 \subsection{Images et Textures}
 
-\begin{lstlisting}[language=HTML]
+\begin{minted}{html}
 <!-- Appliquer une image comme texture -->
 <a-box src="chemin/vers/image.jpg"></a-box>
 
@@ -211,11 +203,11 @@ radius="1.5"         <!-- Rayon (pour sphere, cylinder, etc.) -->
 
 <!-- Image sur un plan (comme un poster) -->
 <a-image src="image.png" position="0 1.5 -2" width="2" height="1"></a-image>
-\end{lstlisting}
+\end{minted}
 
 \subsection{Lumières}
 
-\begin{lstlisting}[language=HTML]
+\begin{minted}{html}
 <!-- Types de lumieres -->
 <a-light type="ambient" color="#BBB"></a-light>       <!-- Eclairage ambiant -->
 <a-light type="directional" position="0 1 1"></a-light>  <!-- Lumiere directionnelle -->
@@ -227,11 +219,11 @@ intensity="0.75"     <!-- Intensite de la lumiere (0-1) -->
 distance="50"        <!-- Distance d'attenuation -->
 angle="60"           <!-- Angle du faisceau pour spot (degres) -->
 penumbra="0.2"       <!-- Flou au bord pour spot (0-1) -->
-\end{lstlisting}
+\end{minted}
 
 \subsection{Animation et Interactivité}
 
-\begin{lstlisting}[language=HTML]
+\begin{minted}{html}
 <!-- Animation simple -->
 <a-box position="0 1 -3" animation="property: rotation; to: 0 360 0; loop: true; dur: 2000"></a-box>
 
@@ -247,11 +239,11 @@ delay="500"           <!-- Delai avant demarrage -->
 loop="true/false"     <!-- Animation en boucle -->
 dir="alternate"       <!-- Direction (normal, reverse, alternate) -->
 easing="easeInOutQuad" <!-- Type d'acceleration -->
-\end{lstlisting}
+\end{minted}
 
 \subsection{Événements et Interactions}
 
-\begin{lstlisting}[language=HTML]
+\begin{minted}{html}
 <!-- Curseur pour interactivite -->
 <a-camera>
   <a-cursor color="#FFFFFF"></a-cursor>
@@ -274,21 +266,21 @@ easing="easeInOutQuad" <!-- Type d'acceleration -->
   // mousedown    - quand on appuie (sans relacher)
   // mouseup      - quand on relache le clic
 </script>
-\end{lstlisting}
+\end{minted}
 
 \subsection{Chargement de Modèles 3D}
 
-\begin{lstlisting}[language=HTML]
+\begin{minted}{html}
 <!-- Chargement de modeles 3D -->
 <a-entity gltf-model="url(modele.glb)" scale="0.5 0.5 0.5" position="0 0 -5"></a-entity>
 
 <!-- Formats supportes -->
 <a-entity obj-model="obj: url(modele.obj); mtl: url(modele.mtl)"></a-entity>
-\end{lstlisting}
+\end{minted}
 
 \subsection{Environnement et Arrière-plan}
 
-\begin{lstlisting}[language=HTML]
+\begin{minted}{html}
 <!-- Arriere-plan avec couleur solide -->
 <a-sky color="#6EBFF5"></a-sky>
 
@@ -297,7 +289,7 @@ easing="easeInOutQuad" <!-- Type d'acceleration -->
 
 <!-- Brouillard pour creer de l'atmosphere -->
 <a-scene fog="type: linear; color: #AAA; near: 0; far: 30"></a-scene>
-\end{lstlisting}
+\end{minted}
 
 \subsection{Conseils et Astuces}
 
