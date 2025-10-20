@@ -1,28 +1,25 @@
-name: Build PDF (minted)
+name: Build PDF with Make
 
 on:
   push:
     branches: [ main, master ]
     paths:
       - 'Makefile'
+      - 'atelier_vr.tex'
       - '**/*.tex'
-      - '**/*.sty'
-      - '**/*.cls'
-      - '**/*.bib'
-      - '**/*.png'
-      - '**/*.jpg'
-      - '**/*.pdf'
+      - 'tex/**'
   pull_request:
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Installe TeX Live (latexmk + paquets utiles) et Pygments
+      # ✅ Install TeX Live + Pygments (needed by minted)
       - name: Install TeX Live and Pygments
         run: |
           sudo apt-get update
@@ -33,24 +30,22 @@ jobs:
             texlive-lang-french texlive-xetex \
             python3-pygments
 
-      # Si ton Makefile a une cible "venv", on la lance (sinon, ça passe).
+      # (Optional) If your Makefile has a 'venv' target that installs pygments, keep it:
       - name: (Optional) Set up Python venv via Makefile
         run: make venv || true
 
-      # Petit check que pygmentize est bien dispo
-      - name: Verify pygmentize
+      - name: Verify pygmentize is available
         run: pygmentize -V
 
-      # Compile via ton Makefile (qui inclut déjà -shell-escape)
+      # Your Makefile already uses -shell-escape — perfect.
       - name: Build PDF with Make
         run: make
 
-      # Aide debug : lister le cache minted
+      # Helpful for diagnosing minted path issues if something goes wrong
       - name: List minted cache (debug)
         if: always()
         run: ls -alR build/_minted-* || true
 
-      # Publie le PDF (où qu’il soit : racine ou build/)
       - name: Upload PDF artifact
         uses: actions/upload-artifact@v4
         with:
@@ -58,3 +53,20 @@ jobs:
           path: |
             **/atelier_vr.pdf
           if-no-files-found: error
+
+  # Optional: Release on tags
+  release:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: atelier_vr-pdf
+          path: .
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            atelier_vr.pdf
