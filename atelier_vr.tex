@@ -1,0 +1,338 @@
+\documentclass[12pt]{article}
+\usepackage[french]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
+
+\lstset{
+  basicstyle=\ttfamily,
+  numbers=left,
+  numberstyle=\tiny,
+  frame=single,
+  breaklines=true,
+  columns=fullflexible,
+  literate={é}{{\'e}}1 {è}{{\`e}}1 {à}{{\`a}}1 {ç}{{\c{c}}}1 {ê}{{\^e}}1
+           {î}{{\^i}}1 {ô}{{\^o}}1 {û}{{\^u}}1 {ë}{{\¨e}}1 {ï}{{\¨i}}1
+           {ü}{{\¨u}}1 {œ}{{\oe}}1 {Œ}{{\OE}}1 {Ç}{{\c{C}}}1
+           {<}{{$<$}}1 {>}{{$>$}}1 {&}{{\&}}1
+}
+
+\title{Atelier Découverte de la VR Interactive}
+\author{Théo AVRIL}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section{Objectifs}
+Ce tutoriel vous permettra de :
+\begin{itemize}
+    \item Comprendre la structure de base d'un document HTML.
+    \item Découvrir la bibliothèque AFrame pour créer une scène VR.
+    \item Ajouter une interactivité simple en JavaScript (changer la couleur d'un objet au clic).
+\end{itemize}
+
+\section{Matériel Nécessaire}
+\begin{itemize}
+    \item Un ordinateur avec un navigateur moderne (Chrome, Firefox, etc.).
+    \item Un éditeur de texte (Visual Studio Code, Sublime Text, etc.).
+    \item Optionnel : un casque VR ou un smartphone compatible pour le mode VR.
+\end{itemize}
+
+\section{Étape 1 : Préparer votre Environnement}
+\subsection{Création d'un fichier HTML}
+\begin{enumerate}
+    \item Ouvrez votre éditeur de texte et créez un nouveau fichier nommé \texttt{index.html}.
+\end{enumerate}
+
+\subsection{Structure de Base}
+Copiez-collez le code suivant dans votre fichier \texttt{index.html} :
+
+\begin{lstlisting}[language=HTML]
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Atelier VR Interactif</title>
+    <!-- Inclusion de la bibliothèque AFrame -->
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+  </head>
+  <body>
+    <!-- La scène VR sera définie ici -->
+  </body>
+</html>
+\end{lstlisting}
+
+\section{Étape 2 : Créer une Scène VR de Base}
+\subsection{Ajouter la Scène et des Objets}
+Dans la balise \texttt{<body>}, ajoutez la balise \texttt{<a-scene>} avec le contenu suivant :
+
+\begin{lstlisting}[language=HTML]
+<body>
+  <a-scene>
+    <!-- Cube interactif : clic pour changer de couleur -->
+    <a-box position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9"
+           animation="property: rotation; to: 0 405 0; loop: true; dur: 4000"
+           change-color-on-click></a-box>
+    
+    <!-- Une sphère -->
+    <a-sphere position="0 1.25 -5" radius="1.25" color="#EF2D5E"></a-sphere>
+    
+    <!-- Un cylindre -->
+    <a-cylinder position="1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D"></a-cylinder>
+    
+    <!-- Un sol -->
+    <a-plane position="0 0 -4" rotation="-90 0 0" width="4" height="4" color="#7BC8A4"></a-plane>
+    
+    <!-- Un ciel -->
+    <a-sky color="#ECECEC"></a-sky>
+  </a-scene>
+</body>
+\end{lstlisting}
+
+\subsection{Explications}
+\begin{itemize}
+    \item \textbf{\texttt{<a-scene>}} : Crée l'environnement VR.
+    \item \textbf{\texttt{<a-box>, <a-sphere>, <a-cylinder>, <a-plane>, <a-sky>}} : Représentent respectivement un cube, une sphère, un cylindre, un sol et un ciel.
+    \item L'attribut \texttt{animation} sur le cube fait tourner l'objet en continu.
+    \item L'attribut \texttt{change-color-on-click} sera utilisé pour activer l'interactivité (voir l'étape suivante).
+\end{itemize}
+
+\section{Étape 3 : Ajouter l'Interactivité avec JavaScript}
+\subsection{Création d'un Composant Personnalisé}
+Nous allons créer un composant AFrame nommé \texttt{change-color-on-click} qui change la couleur d'un objet lorsqu'on clique dessus.
+
+\subsection{Ajouter le Script JavaScript}
+Ajoutez le code suivant juste avant la fermeture de la balise \texttt{</body>} :
+
+\begin{lstlisting}[language=HTML]
+<!-- Script JavaScript pour ajouter l'interactivité -->
+<script>
+  // Enregistrement d'un composant personnalisé "change-color-on-click"
+  AFRAME.registerComponent('change-color-on-click', {
+    init: function () {
+      // Ecoute de l'événement 'click' sur l'élément
+      this.el.addEventListener('click', function () {
+        // Génère une couleur aléatoire au format hexadécimal
+        var randomColor = '#' + Math.floor(Math.random() * 16777215).toString(16);
+        // Change la couleur de l'élément cliqué
+        this.setAttribute('color', randomColor);
+      });
+    }
+  });
+</script>
+\end{lstlisting}
+
+\subsection{Explications}
+\begin{itemize}
+    \item \textbf{AFRAME.registerComponent} : Permet de créer un composant personnalisé dans AFrame.
+    \item La fonction \texttt{init} est exécutée lors de l'initialisation de l'élément.
+    \item \texttt{addEventListener('click', ...)} : Ajoute un écouteur d'événement pour détecter le clic sur l'élément.
+    \item Le script génère une couleur hexadécimale aléatoire et met à jour l'attribut \texttt{color} de l'élément cliqué.
+\end{itemize}
+
+\section{Étape 4 : Tester et Personnaliser}
+\subsection{Tester la Scène VR}
+\begin{enumerate}
+    \item Sauvegardez votre fichier \texttt{index.html}.
+    \item Ouvrez-le dans un navigateur moderne. Vous verrez la scène VR avec le cube, la sphère, le cylindre, le sol et le ciel.
+    \item Cliquez sur le cube pour observer le changement de couleur.
+\end{enumerate}
+
+\subsection{Explorer et Modifier}
+\begin{itemize}
+    \item Modifiez les valeurs des attributs \texttt{position}, \texttt{color} ou \texttt{rotation} pour observer les changements.
+    \item Ajoutez de nouveaux objets, par exemple en utilisant les balises \texttt{<a-cone>} ou \texttt{<a-torus>}.
+    \item Expérimentez en modifiant l'interactivité, comme changer la taille ou la position de l'objet lors d'un clic.
+\end{itemize}
+
+\section{Glossaire et Documentation A-Frame}
+
+Cette section vous propose une documentation rapide des commandes et attributs les plus utiles d'A-Frame pour créer vos propres scènes VR.
+
+\subsection{Formes et Objets 3D de Base}
+
+\begin{lstlisting}[language=HTML]
+<!-- Formes primitives -->
+<a-box>          <!-- Un cube ou parallelepipede -->
+<a-sphere>       <!-- Une sphere -->
+<a-cylinder>     <!-- Un cylindre -->
+<a-plane>        <!-- Un plan (surface plate) -->
+<a-cone>         <!-- Un cone -->
+<a-torus>        <!-- Un tore (forme d'anneau/donut) -->
+<a-ring>         <!-- Un anneau plat (cercle avec trou) -->
+<a-circle>       <!-- Un cercle plat -->
+<a-triangle>     <!-- Un triangle plat -->
+<a-sky>          <!-- Un ciel spherique (environnement) -->
+\end{lstlisting}
+
+\subsection{Attributs Communs}
+
+Ces attributs peuvent être appliqués à la plupart des objets :
+
+\begin{lstlisting}[language=HTML]
+<!-- Position, Rotation, et Echelle -->
+position="x y z"     <!-- Position en metres (x: gauche/droite, y: haut/bas, z: avant/arriere) -->
+rotation="x y z"     <!-- Rotation en degres (autour des axes x, y, z) -->
+scale="x y z"        <!-- Echelle (1 1 1 par defaut = taille normale) -->
+
+<!-- Apparence -->
+color="#ff0000"      <!-- Couleur (format hexadecimal) -->
+opacity="0.5"        <!-- Opacite (0 = transparent, 1 = opaque) -->
+visible="true/false" <!-- Visibilite de l'objet -->
+metalness="0.5"      <!-- Aspect metallique (0 = mat, 1 = metallique) -->
+roughness="0.5"      <!-- Rugosite (0 = lisse/reflechissant, 1 = rugueux) -->
+
+<!-- Dimensions specifiques -->
+width="2"            <!-- Largeur (pour box, plane, etc.) -->
+height="1"           <!-- Hauteur (pour box, plane, etc.) -->
+depth="0.5"          <!-- Profondeur (pour box) -->
+radius="1.5"         <!-- Rayon (pour sphere, cylinder, etc.) -->
+\end{lstlisting}
+
+\subsection{Images et Textures}
+
+\begin{lstlisting}[language=HTML]
+<!-- Appliquer une image comme texture -->
+<a-box src="chemin/vers/image.jpg"></a-box>
+
+<!-- Image comme arriere-plan du ciel -->
+<a-sky src="ciel.jpg"></a-sky>
+
+<!-- Images 360 degres pour environnement -->
+<a-sky src="panorama360.jpg"></a-sky>
+
+<!-- Image sur un plan (comme un poster) -->
+<a-image src="image.png" position="0 1.5 -2" width="2" height="1"></a-image>
+\end{lstlisting}
+
+\subsection{Lumières}
+
+\begin{lstlisting}[language=HTML]
+<!-- Types de lumieres -->
+<a-light type="ambient" color="#BBB"></a-light>       <!-- Eclairage ambiant -->
+<a-light type="directional" position="0 1 1"></a-light>  <!-- Lumiere directionnelle -->
+<a-light type="point" position="0 2 0"></a-light>     <!-- Point lumineux -->
+<a-light type="spot" position="0 2 0" angle="45"></a-light> <!-- Projecteur -->
+
+<!-- Attributs pour lumieres -->
+intensity="0.75"     <!-- Intensite de la lumiere (0-1) -->
+distance="50"        <!-- Distance d'attenuation -->
+angle="60"           <!-- Angle du faisceau pour spot (degres) -->
+penumbra="0.2"       <!-- Flou au bord pour spot (0-1) -->
+\end{lstlisting}
+
+\subsection{Animation et Interactivité}
+
+\begin{lstlisting}[language=HTML]
+<!-- Animation simple -->
+<a-box position="0 1 -3" animation="property: rotation; to: 0 360 0; loop: true; dur: 2000"></a-box>
+
+<!-- Attributs d'animation -->
+animation="property: position; to: 0 2 -3; dur: 2000; easing: easeInOutQuad; loop: true"
+
+<!-- Proprietes animables principales -->
+property="position"    <!-- Propriete a animer (position, rotation, scale, color...) -->
+from="0 1 -3"         <!-- Valeur de depart (optionnel) -->
+to="0 2 -3"           <!-- Valeur d'arrivee -->
+dur="2000"            <!-- Duree en millisecondes -->
+delay="500"           <!-- Delai avant demarrage -->
+loop="true/false"     <!-- Animation en boucle -->
+dir="alternate"       <!-- Direction (normal, reverse, alternate) -->
+easing="easeInOutQuad" <!-- Type d'acceleration -->
+\end{lstlisting}
+
+\subsection{Événements et Interactions}
+
+\begin{lstlisting}[language=HTML]
+<!-- Curseur pour interactivite -->
+<a-camera>
+  <a-cursor color="#FFFFFF"></a-cursor>
+</a-camera>
+
+<!-- Composants d'interaction predefinis -->
+<a-entity cursor="rayOrigin: mouse"></a-entity>   <!-- Curseur suivant la souris -->
+
+<!-- Declaration simplifiee d'un script pour gerer un evenement -->
+<script>
+  // Exemple : changer la couleur au clic
+  document.querySelector('#monElement').addEventListener('click', function() {
+    this.setAttribute('color', 'red');
+  });
+  
+  // Evenements disponibles
+  // click        - au clic ou tap
+  // mouseenter   - quand le curseur passe sur l'objet
+  // mouseleave   - quand le curseur quitte l'objet
+  // mousedown    - quand on appuie (sans relacher)
+  // mouseup      - quand on relache le clic
+</script>
+\end{lstlisting}
+
+\subsection{Chargement de Modèles 3D}
+
+\begin{lstlisting}[language=HTML]
+<!-- Chargement de modeles 3D -->
+<a-entity gltf-model="url(modele.glb)" scale="0.5 0.5 0.5" position="0 0 -5"></a-entity>
+
+<!-- Formats supportes -->
+<a-entity obj-model="obj: url(modele.obj); mtl: url(modele.mtl)"></a-entity>
+\end{lstlisting}
+
+\subsection{Environnement et Arrière-plan}
+
+\begin{lstlisting}[language=HTML]
+<!-- Arriere-plan avec couleur solide -->
+<a-sky color="#6EBFF5"></a-sky>
+
+<!-- Arriere-plan avec image 360 degres -->
+<a-sky src="ciel_360.jpg" rotation="0 -130 0"></a-sky>
+
+<!-- Brouillard pour creer de l'atmosphere -->
+<a-scene fog="type: linear; color: #AAA; near: 0; far: 30"></a-scene>
+\end{lstlisting}
+
+\subsection{Conseils et Astuces}
+
+\begin{itemize}
+    \item \textbf{Système de coordonnées} : Les coordonnées dans A-Frame sont en mètres. L'axe Y est la hauteur (vertical), l'axe X est la largeur (horizontal) et l'axe Z détermine la profondeur (valeurs négatives = éloignement).
+    
+    \item \textbf{Performances} : Pour une expérience VR fluide, limitez le nombre d'objets complexes et de lumières.
+    
+    \item \textbf{Test sur mobile} : Pour tester sur smartphone, hébergez votre page sur un serveur web local ou utilisez un service comme Glitch.com.
+    
+    \item \textbf{Organisation du code} : Utilisez des \texttt{<a-entity>} avec des \texttt{id} pour regrouper des éléments et simplifier leur manipulation.
+    
+    \item \textbf{Attributs multiples} : Vous pouvez combiner plusieurs attributs sur un même élément.
+
+    \item \textbf{Inspection} : Appuyez sur \texttt{Ctrl+Alt+I} dans une scène A-Frame pour activer l'inspecteur visuel.
+\end{itemize}
+
+\subsection{Exemples de Mini-Projets}
+
+\begin{enumerate}
+    \item \textbf{Galerie d'images} : Placez plusieurs \texttt{<a-image>} dans un environnement pour créer une exposition.
+    
+    \item \textbf{Système solaire} : Créez des planètes avec des \texttt{<a-sphere>} et animez-les autour d'un soleil.
+    
+    \item \textbf{Jeu simple} : Utilisez le curseur pour "attraper" ou faire disparaître des objets.
+    
+    \item \textbf{Maison virtuelle} : Combinez des \texttt{<a-box>} et autres primitives pour construire une architecture.
+\end{enumerate}
+
+\subsection{Ressources Complémentaires}
+
+\begin{itemize}
+    \item \textbf{Documentation officielle} : \url{https://aframe.io/docs/}
+    \item \textbf{Exemples A-Frame} : \url{https://aframe.io/examples/}
+    \item \textbf{Bibliothèque de composants} : \url{https://www.npmjs.com/search?q=aframe-component}
+    \item \textbf{Modèles 3D gratuits} : Sketchfab, Google Poly, TurboSquid
+    \item \textbf{Textures} : Textures.com, Freepik
+    \item \textbf{Éditeur en ligne} : \url{https://glitch.com/~aframe}
+\end{itemize}
+
+\end{document}
