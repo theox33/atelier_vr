@@ -1,39 +1,56 @@
-name: Build PDF with Make
+name: Build PDF (minted)
 
 on:
   push:
     branches: [ main, master ]
     paths:
       - 'Makefile'
-      - 'atelier_vr.tex'
       - '**/*.tex'
-      - 'tex/**'
+      - '**/*.sty'
+      - '**/*.cls'
+      - '**/*.bib'
+      - '**/*.png'
+      - '**/*.jpg'
+      - '**/*.pdf'
   pull_request:
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Installe un environnement LaTeX raisonnable (latexmk + packages courants)
-      - name: Install TeX Live
+      # Installe TeX Live (latexmk + paquets utiles) et Pygments
+      - name: Install TeX Live and Pygments
         run: |
           sudo apt-get update
           sudo apt-get install -y \
             make latexmk \
             texlive-latex-recommended texlive-latex-extra \
             texlive-fonts-recommended texlive-fonts-extra \
-            texlive-lang-french texlive-xetex
+            texlive-lang-french texlive-xetex \
+            python3-pygments
 
-      # Lance make (si ta cible n'est pas la cible par défaut, remplace par: make atelier_vr.pdf)
+      # Si ton Makefile a une cible "venv", on la lance (sinon, ça passe).
+      - name: (Optional) Set up Python venv via Makefile
+        run: make venv || true
+
+      # Petit check que pygmentize est bien dispo
+      - name: Verify pygmentize
+        run: pygmentize -V
+
+      # Compile via ton Makefile (qui inclut déjà -shell-escape)
       - name: Build PDF with Make
         run: make
 
-      # Publie le PDF compilé comme artifact téléchargeable depuis la page du run
+      # Aide debug : lister le cache minted
+      - name: List minted cache (debug)
+        if: always()
+        run: ls -alR build/_minted-* || true
+
+      # Publie le PDF (où qu’il soit : racine ou build/)
       - name: Upload PDF artifact
         uses: actions/upload-artifact@v4
         with:
@@ -41,20 +58,3 @@ jobs:
           path: |
             **/atelier_vr.pdf
           if-no-files-found: error
-
-  # Optionnel : créer automatiquement une Release quand tu pousses un tag (ex: v1.0.0)
-  release:
-    if: startsWith(github.ref, 'refs/tags/')
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: atelier_vr-pdf
-          path: .
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: |
-            atelier_vr.pdf
