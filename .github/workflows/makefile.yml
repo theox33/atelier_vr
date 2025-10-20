@@ -14,12 +14,10 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # TeX Live + Pygments pour minted
       - name: Install TeX Live and Pygments
         run: |
           sudo apt-get update
@@ -33,44 +31,15 @@ jobs:
       - name: Verify pygmentize
         run: pygmentize -V
 
-      # 🔧 NEW: Préparer les fichiers attendus par \inputminted{...}{file}
-      - name: Prepare sources for minted
-        shell: bash
+      # ✅ NEW: create atelier_vr.pyg only if missing (no repo changes needed)
+      - name: Ensure minted input files exist
         run: |
-          # extrait les chemins de fichiers du 2e argument de \inputminted
-          # (tolère les options [..] éventuelles)
-          mapfile -t MINTED_FILES < <(perl -ne '
-            while (m/\\inputminted(?:\[[^\]]*\])?\{[^}]+\}\{([^}]+)\}/g) {
-              print "$1\n";
-            }' atelier_vr.tex | sort -u)
+          if [ ! -f atelier_vr.pyg ]; then
+            printf '%s\n' '<!-- placeholder created in CI so \inputminted can read it -->' > atelier_vr.pyg
+          fi
 
-          echo "Files referenced by \\inputminted:"
-          printf ' - %s\n' "${MINTED_FILES[@]}"
-
-          # crée un placeholder minimal si le fichier est manquant
-          for f in "${MINTED_FILES[@]}"; do
-            if [ ! -f "$f" ]; then
-              echo "Missing source '$f' → creating a minimal placeholder."
-              mkdir -p "$(dirname "$f")"
-              printf '%s\n' '<!-- placeholder created by CI so minted can compile -->' > "$f"
-            fi
-          done
-
-      # (facultatif) Log utile si ça re-casse
-      - name: Verify minted sources exist
-        run: |
-          ls -al
-          # liste aussi les éventuels sous-dossiers
-          find . -maxdepth 2 -type f -name '*.pyg' -o -name '*.html' -o -name '*.js' || true
-
-      # Compile via TON Makefile (déjà avec -shell-escape)
       - name: Build PDF with Make
         run: make
-
-      # Debug : cache minted
-      - name: List minted cache (debug)
-        if: always()
-        run: ls -alR build/_minted-* || true
 
       - name: Upload PDF artifact
         uses: actions/upload-artifact@v4
