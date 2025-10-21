@@ -214,12 +214,214 @@ metalness="0.5"   roughness="0.5"   src="image.jpg"
 \end{itemize}
 
 \section{Mini-projets guidés}
-\subsection*{1. Galerie 3D}
-Démarre en dupliquant \texttt{<a-image>} (change \texttt{src} et \texttt{position}); au clic, agrandis puis reviens.
-\subsection*{2. Système solaire}
-\texttt{<a-sphere>} pour planètes + animations d'orbite; lumière \texttt{point} au centre.
-\subsection*{3. Jeu "attrape-la-boîte"}
-Au clic, la boîte se déplace au hasard; compte le score dans une \texttt{<a-text>} simple.
+
+\subsection*{1. Galerie 3D interactive (10–20 min)}
+
+\textbf{But :} afficher plusieurs images comme dans une petite expo 3D ; au survol, l’image s’agrandit, au clic elle revient à la taille normale.
+
+\textbf{Préparation (fichiers)} : place au moins \texttt{img1.jpg}, \texttt{img2.jpg}, \texttt{img3.jpg} dans le \textbf{même dossier} que \texttt{index.html}.
+
+\paragraph{Étape 1 — Déclarer les assets}
+Ajoute des images dans \texttt{<a-assets>} (une seule fois par page) :
+
+\begin{minted}{html}
+<a-assets>
+  <img id="img1" src="img1.jpg">
+  <img id="img2" src="img2.jpg">
+  <img id="img3" src="img3.jpg">
+</a-assets>
+\end{minted}
+
+\begin{checkpoint}
+\textbf{OK si :} la page se charge sans erreur dans la console (F12). Rien ne s’affiche encore (c’est normal).
+\end{checkpoint}
+
+\paragraph{Étape 2 — Poser 3 cadres d’images}
+Affiche trois \texttt{<a-image>} alignées. Choisis des \texttt{position} (x, y, z) cohérentes (z négatif = devant) :
+
+\begin{minted}{html}
+<a-image id="p1" src="#img1" position="-1 1.5 -3" width="1.5" height="1"></a-image>
+<a-image id="p2" src="#img2" position=" 0 1.5 -3" width="1.5" height="1"></a-image>
+<a-image id="p3" src="#img3" position=" 1 1.5 -3" width="1.5" height="1"></a-image>
+\end{minted}
+
+\begin{checkpoint}
+\textbf{Résultat attendu :} 3 images visibles, côte à côte, à hauteur d’yeux.
+\end{checkpoint}
+
+\paragraph{Étape 3 — Effet zoom au survol (mouseenter / mouseleave)}
+Ajoute ce squelette JS et \textbf{complète} les TODO. L’idée : au survol, \texttt{scale} passe à \texttt{1.2 1.2 1} puis revient à \texttt{1 1 1}.
+
+\begin{minted}{html}
+<script>
+  window.addEventListener('DOMContentLoaded', () => {
+    const frames = document.querySelectorAll('a-image'); // tes 3 images
+    frames.forEach((el) => {
+      el.addEventListener('mouseenter', () => {
+        // TODO: agrandir légèrement l'image (scale)
+        // el.setAttribute('scale', '... ... ...');
+      });
+      el.addEventListener('mouseleave', () => {
+        // TODO: revenir à l'échelle normale
+        // el.setAttribute('scale', '... ... ...');
+      });
+    });
+  });
+</script>
+\end{minted}
+
+\paragraph{Étape 4 — Clic pour réinitialiser (ou afficher une légende)}
+Au clic, reviens à l’échelle normale \textbf{ou} affiche une \texttt{<a-text>} sous l’image (au choix) :
+
+\begin{minted}{html}
+<script>
+  // ... suite du code précédent
+  // TODO: Dans le forEach, ajoute un listener 'click' qui:
+  // - remet scale à '1 1 1'
+  // - (option) set une légende via <a-text> existante ou ajoutée avant
+</script>
+\end{minted}
+
+\paragraph{Bonus}
+Ajoute un “cadre” : place un \texttt{<a-plane>} légèrement plus grand juste derrière chaque image (même position, z un peu plus proche de 0).
+
+\begin{checkpoint}
+\textbf{Terminé si :} le zoom se fait bien au survol, et le clic réinitialise (ou affiche une légende).
+\end{checkpoint}
+
+
+\subsection*{2. Système solaire simplifié (15–25 min)}
+
+\textbf{But :} un “soleil” au centre + une planète en orbite (et \textbf{bonus} : une lune). L’orbite se fait en animant la \textbf{rotation d’un parent}.
+
+\paragraph{Étape 1 — Créer le soleil + lumière}
+Place le soleil et une lumière \texttt{point} proche du soleil :
+
+\begin{minted}{html}
+<!-- Soleil au centre -->
+<a-sphere id="sun" position="0 1.5 -4" radius="0.5" color="#FDB813"></a-sphere>
+<!-- Lumière "solaire" -->
+<a-light type="point" position="0 1.5 -4" intensity="1.5"></a-light>
+\end{minted}
+
+\begin{checkpoint}
+\textbf{Résultat attendu :} une sphère jaune bien éclairée, visible devant toi.
+\end{checkpoint}
+
+  \paragraph{Étape 2 — Orbite planétaire (parent rotateur)}
+  Le \textbf{truc} : on crée un \texttt{<a-entity>} parent au même endroit que le soleil, on \textbf{anime sa rotation}, et on place la planète en \textbf{décalage} sur l’axe X (rayon d'orbite approx. 1.5).
+
+\begin{minted}{html}
+<!-- Parent qui tourne -->
+<a-entity id="orbit1" position="0 1.5 -4"
+          animation="property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear">
+  <!-- Planète décalée sur X : rayon d'orbite approx. 1.5 -->
+  <a-sphere id="planet1" position="1.5 0 0" radius="0.2" color="#4CC3D9"></a-sphere>
+</a-entity>
+\end{minted}
+
+\begin{checkpoint}
+\textbf{Résultat attendu :} la planète tourne autour du soleil (même si tu ne vois pas le parent).
+\end{checkpoint}
+
+\paragraph{Étape 3 — Ajouter une lune (orbite locale)}
+Même principe : un parent secondaire centré sur la planète.
+
+\begin{minted}{html}
+<!-- Dans orbit1, autour de planet1 -->
+<a-entity id="orbitMoon"
+          animation="property: rotation; to: 0 360 0; loop: true; dur: 3000; easing: linear">
+  <!-- Lune décalée de planet1 (position relative) -->
+  <a-sphere id="moon1" position="0.4 0 0" radius="0.06" color="#BBB"></a-sphere>
+</a-entity>
+\end{minted}
+
+\begin{checkpoint}
+\textbf{Résultat attendu :} la planète orbite le soleil, la lune orbite la planète.
+\end{checkpoint}
+
+\paragraph{Étape 4 — Ajuster vitesses et distances}
+Modifie \texttt{dur} (vitesse d’orbite) et \texttt{position.x} (rayon) pour obtenir un rendu lisible.  
+\textbf{Bonus :} ellipse approximative en animant aussi \texttt{position} de la planète (lentement) entre deux valeurs.
+
+
+\subsection*{3. Jeu “attrape-la-boîte” (15–25 min)}
+
+\textbf{But :} cliquer la boîte pour marquer des points ; à chaque clic, elle “saute” ailleurs. Afficher le score via \texttt{<a-text>}.
+
+\paragraph{Étape 1 — Cible + score}
+Place une boîte cible (légère rotation pour la repérer) et un texte de score :
+
+\begin{minted}{html}
+<a-box id="target" position="0 1 -3" rotation="0 45 0" color="#4CC3D9"></a-box>
+<a-text id="score" value="Score: 0" position="-0.6 2 -3" color="#FFFFFF"></a-text>
+\end{minted}
+
+\begin{checkpoint}
+\textbf{Résultat attendu :} la boîte et le texte “Score: 0” sont visibles.
+\end{checkpoint}
+
+\paragraph{Étape 2 — Squelette du script}
+Ajoute ce squelette JS, puis \textbf{complète} les TODO. Objectif : au clic, \textit{score++}, mise à jour du texte, et \textbf{repositionnement} de la boîte dans une zone raisonnable devant toi.
+
+\begin{minted}{html}
+<script>
+  window.addEventListener('DOMContentLoaded', () => {
+    const target = document.querySelector('#target');
+    const scoreText = document.querySelector('#score');
+    let score = 0;
+
+    function randomInRange(min, max) {
+      return parseFloat((Math.random() * (max - min) + min).toFixed(2));
+    }
+
+    function moveTarget() {
+      // TODO: choisis des bornes raisonnables
+      // x: [-2, 2], y: [0.6, 2], z: [-4.5, -3]
+      const newPos = {
+        x: randomInRange(-2, 2),
+        y: randomInRange(0.6, 2),
+        z: randomInRange(-4.5, -3)
+      };
+      // TODO: applique la nouvelle position
+      // target.setAttribute('position', newPos);
+    }
+
+    // 1) Au clic: +1 point, mettre à jour le texte, déplacer la cible
+    target.addEventListener('click', () => {
+      // TODO: incrémenter score
+      // score = ...
+      // TODO: mettre à jour l'affichage
+      // scoreText.setAttribute('value', 'Score: ' + score);
+      // TODO: déplacer la cible
+      // moveTarget();
+    });
+
+    // 2) Option: au survol, légère mise en évidence
+    target.addEventListener('mouseenter', () => {
+      // TODO: agrandir un peu la boîte (ex: 1.1 1.1 1.1)
+    });
+    target.addEventListener('mouseleave', () => {
+      // TODO: revenir à 1 1 1
+    });
+
+    // Démarrage: placer une première fois la cible
+    moveTarget();
+  });
+</script>
+\end{minted}
+
+\begin{checkpoint}
+\textbf{Résultat attendu :} chaque clic fait +1 et déplace la boîte ; le score s’affiche correctement.
+\end{checkpoint}
+
+\paragraph{Bonus (au choix)}
+\begin{itemize}
+  \item \textbf{Timer :} ajoute un compte à rebours via \texttt{setInterval} ; quand il atteint 0, désactive le clic.
+  \item \textbf{Difficulté :} diminue l’intervalle des positions (zone plus large, ou plus éloignée) à chaque point.
+  \item \textbf{Effet :} ajoute une animation \texttt{animation="property: rotation; ..."} pour faire tourner la boîte plus vite après chaque clic.
+\end{itemize}
+
 
 \section{Dépannage (FAQ rapide)}
 \begin{itemize}
