@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Atelier VR Interactif</title>
+        <!-- A-Frame -->
+        <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    </head>
+    <body>
+        
+        <!-- Interactivité : changer la couleur d'un objet au clic -->
+        <script>
+            AFRAME.registerComponent('change-color-on-click', {
+                init: function () {
+                    this.el.addEventListener('click', function () {
+                        // Couleur hex aléatoire fiable (6 chiffres)
+                        const n = Math.floor(Math.random() * 16777215);
+                        const randomColor = '#' + n.toString(16).padStart(6, '0');
+                        this.setAttribute('color', randomColor);
+                        
+                        // Position aléatoire sur l'axe X entre -2 et 2
+                        this.setAttribute('position', {
+                        x: parseFloat((Math.random() * 4 - 2).toFixed(2)),
+                        y: 1,
+                        z: -3
+                        });
+                    });
+                }
+            });
+        </script>
+        
+        <!-- La scène VR sera ajoutée ici -->
+        <a-scene>
+            <!-- Cube interactif (on ajoutera le script ensuite) -->
+            <a-box id="box1" position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9" animation="property: rotation; to: 0 405 0; loop: true; dur: 4000" change-color-on-click></a-box>
+            
+            <!-- Autres objets -->
+            <a-sphere position="0 1.25 -5" radius="1.25" color="#EF2D5E"></a-sphere>
+            <a-cylinder position="1 0.75 -3" radius="0.5" height="1.5", color="#FFC65D"></a-cylinder>
+            
+            <!-- Sol et ciel -->
+            <a-plane position="0 0 -4" rotation="-90 0 0" width="4" height="4", color="#7BC8A4"></a-plane>
+            <a-sky color="#ECECEC"></a-sky>
+            
+            <!-- Interaction souris Desktop -->
+            <a-entity cursor="rayOrigin: mouse"></a-entity>
+        </a-scene>
+    </body>
+</html>
