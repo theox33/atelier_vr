@@ -1,0 +1,133 @@
+
+\documentclass[12pt]{article}
+\usepackage[french]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage[outputdir=build]{minted}
+\usemintedstyle{friendly}
+
+% --- Visuel léger ---
+\definecolor{theoblue}{RGB}{23,113,181}
+\definecolor{lightblue}{RGB}{239,247,254}
+\definecolor{codebg}{RGB}{250,250,250}
+\definecolor{coderule}{RGB}{200,200,200}
+\titleformat{\section}{\Large\bfseries\color{theoblue}}{\thesection}{0.5em}{}
+\titleformat{\subsection}{\large\bfseries\color{theoblue}}{\thesubsection}{0.5em}{}
+\setlist[itemize]{topsep=4pt,itemsep=4pt}
+\setlist[enumerate]{topsep=4pt,itemsep=4pt}
+\setminted{fontsize=\small,breaklines=true,linenos=false,autogobble=true,encoding=utf8,frame=single,bgcolor=codebg,rulecolor=coderule}
+
+\title{Atelier Découverte de la VR Interactive}
+\author{Théo AVRIL}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section*{Ce que tu vas faire (30 minutes)}
+\begin{itemize}
+  \item Créer une \textbf{page web} minimale.
+  \item Ajouter une \textbf{scène 3D} avec \textbf{A-Frame}.
+  \item Rendre un cube \textbf{interactif} (il change de couleur au clic).
+\end{itemize}
+
+\section*{Matériel}
+Un navigateur moderne (Chrome/Firefox) et un éditeur de texte (VS Code, etc.).
+
+\section{Étape 1 — Lance ta page web (5 min)}
+Crée un fichier \texttt{index.html}, et colle le code suivant :
+
+\begin{minted}{html}
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Atelier VR Interactif</title>
+    <!-- A-Frame -->
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+  </head>
+  <body>
+    <!-- La scène VR sera ajoutée ici -->
+  </body>
+</html>
+\end{minted}
+
+\textit{Ouvre ce fichier dans ton navigateur : tu as une page web prête à accueillir la 3D.}
+
+\section{Étape 2 — Ajoute une scène 3D (10 min)}
+Ajoute le contenu suivant dans la balise \texttt{<body>} :
+
+\begin{minted}{html}
+<body>
+  <a-scene>
+    <!-- Cube interactif (on ajoutera le script ensuite) -->
+    <a-box position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9"
+           animation="property: rotation; to: 0 405 0; loop: true; dur: 4000"
+           change-color-on-click></a-box>
+
+    <!-- Autres objets -->
+    <a-sphere position="0 1.25 -5" radius="1.25" color="#EF2D5E"></a-sphere>
+    <a-cylinder position="1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D"></a-cylinder>
+
+    <!-- Sol et ciel -->
+    <a-plane position="0 0 -4" rotation="-90 0 0" width="4" height="4" color="#7BC8A4"></a-plane>
+    <a-sky color="#ECECEC"></a-sky>
+  </a-scene>
+</body>
+\end{minted}
+
+\textbf{À savoir :} \texttt{<a-scene>} crée la scène VR; \texttt{<a-box>}, \texttt{<a-sphere>}, \texttt{<a-cylinder>} sont des objets 3D prêts à l'emploi.
+
+\section{Étape 3 — Rends ton cube interactif (10 min)}
+Colle ce script juste avant \texttt{</body>} :
+
+\begin{minted}{html}
+<!-- Interactivité : changer la couleur d'un objet au clic -->
+<script>
+  AFRAME.registerComponent('change-color-on-click', {
+    init: function () {
+      this.el.addEventListener('click', function () {
+        // Couleur hex aléatoire
+        var randomColor = '#' + Math.floor(Math.random() * 16777215).toString(16);
+        this.setAttribute('color', randomColor);
+      });
+    }
+  });
+</script>
+\end{minted}
+
+\textbf{Teste :} clique sur le cube — il tourne et change de couleur.
+
+\section{Bonus (5 min)}
+Si tu as fini avant les autres, ajoute une autre interaction : déplacer le cube au clic :
+
+\begin{minted}{html}
+this.setAttribute('position', {
+  x: (Math.random() * 4 - 2).toFixed(2),
+  y: 1,
+  z: -3
+});
+\end{minted}
+
+\section*{Aide rapide}
+\begin{itemize}
+  \item \texttt{position="x y z"} déplace un objet.
+  \item \texttt{rotation="x y z"} oriente un objet.
+  \item \texttt{color="\#RRGGBB"} change la couleur.
+  \item L'inspecteur A-Frame s'ouvre avec \texttt{Ctrl+Alt+I}.
+\end{itemize}
+
+\section*{Pour aller plus loin}
+\begin{itemize}
+  \item Documentation officielle : \url{https://aframe.io/docs/}
+  \item Exemples : \url{https://aframe.io/examples/}
+  \item Éditeur en ligne : \url{https://glitch.com/~aframe}
+\end{itemize}
+
+\end{document}

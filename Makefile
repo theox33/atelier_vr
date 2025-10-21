@@ -5,54 +5,65 @@ PDF = $(OUTDIR)/$(TEX).pdf
 VENV = .venv
 REQUIREMENTS = requirements.txt
 
+
+DOCSIMPL = doc/atelier_vr_simplifie.tex
+DOCAVANCE = doc/atelier_vr_avance.tex
+VENV = doc/.venv
+MINTED = doc/_minted-atelier_vr
+BUILDDIR = doc/build
+RELEASEDIR = doc/release
+PDFSIMPL = $(RELEASEDIR)/atelier_vr_simplifie.pdf
+PDFAVANCE = $(RELEASEDIR)/atelier_vr_avance.pdf
+
 LATEXMK = latexmk
-LATEXMK_OPTS = -pdf -output-directory=$(OUTDIR) -jobname=$(TEX) -interaction=nonstopmode
+LATEXMK_OPTS = -pdf -interaction=nonstopmode
 
 
-.PHONY: all release clean distclean view install venv
 
-# Par défaut, construire et copier le PDF à la racine
-all: release
+.PHONY: all pdf-simplifie pdf-avance clean distclean install venv
 
-$(OUTDIR):
-	mkdir -p $(OUTDIR)
 
-$(PDF): | $(OUTDIR)
-	@echo "Compiling $(TEXSRC) -> $(PDF)"
-	# Ensure minted can call pygmentize. Prefer .venv if present by prepending it to PATH.
-	# Use latexmk with a pdflatex command that includes -shell-escape.
-	PATH=$(VENV)/bin:$$PATH $(LATEXMK) $(LATEXMK_OPTS) -pdflatex="pdflatex -shell-escape -interaction=nonstopmode" $(TEXSRC)
+all: pdf-simplifie pdf-avance
 
-# Create a Python virtual environment and install pip requirements.
-venv:
-	@echo "Creating virtualenv in $(VENV) and installing requirements"
-	@python3 -m venv $(VENV)
-	@$(VENV)/bin/pip install --upgrade pip
-	@if [ -f $(REQUIREMENTS) ]; then $(VENV)/bin/pip install -r $(REQUIREMENTS); else echo "No $(REQUIREMENTS) found, skipping pip install"; fi
 
-install: venv
-	@echo "Virtualenv ready ($(VENV))."
+pdf-simplifie: $(PDFSIMPL)
+pdf-avance: $(PDFAVANCE)
 
-# release: build puis copier le PDF à la racine
-release: $(PDF)
-	@echo "Copying $(PDF) to $(TEX).pdf at project root"
-	@cp -f $(PDF) $(TEX).pdf
 
-# tidy: place auxiliary files into build/ (latexmk already writes aux files to output dir)
-tidy: ; @echo "Auxiliaires stockés dans $(OUTDIR)/"
+$(PDFSIMPL): $(DOCSIMPL) | $(RELEASEDIR) $(BUILDDIR)
+	@echo "Compiling $< -> $@"
+	cd doc && PATH=.venv/bin:$$PATH latexmk -pdf -interaction=nonstopmode -shell-escape -output-directory=build $(notdir $(DOCSIMPL))
+	@mv doc/build/atelier_vr_simplifie.pdf doc/release/atelier_vr_simplifie.pdf
+
+
+$(PDFAVANCE): $(DOCAVANCE) | $(RELEASEDIR) $(BUILDDIR)
+	@echo "Compiling $< -> $@"
+	cd doc && PATH=.venv/bin:$$PATH latexmk -pdf -interaction=nonstopmode -shell-escape -output-directory=build $(notdir $(DOCAVANCE))
+	@mv doc/build/atelier_vr_avance.pdf doc/release/atelier_vr_avance.pdf
+$(BUILDDIR):
+	mkdir -p $(BUILDDIR)
+
+$(RELEASEDIR):
+	mkdir -p $(RELEASEDIR)
+
+
+
+
+
 
 clean:
-	@echo "Cleaning auxiliary files in $(OUTDIR)"
-	-@find $(OUTDIR) -type f \( -name '*.aux' -o -name '*.log' -o -name '*.fls' -o -name '*.fdb_latexmk' -o -name '*.out' -o -name '*.toc' -o -name '*.synctex.gz' -o -name '*.nav' -o -name '*.snm' \) -delete || true
-	# Remove minted auxiliary directory and intermediate pygtex files at project root
-	-@rm -rf _minted-$(TEX) || true
-	-@find . -maxdepth 1 -type f -name '*.pygtex' -delete || true
-	-@rm -f $(TEX).pdf || true
+	@echo "Cleaning auxiliary files in ./doc/build"
+	-@find $(BUILDDIR) -type f \( -name '*.aux' -o -name '*.log' -o -name '*.fls' -o -name '*.fdb_latexmk' -o -name '*.out' -o -name '*.toc' -o -name '*.synctex.gz' -o -name '*.nav' -o -name '*.snm' \) -delete || true
+	-@rm -rf $(BUILDDIR)/_minted-* || true
+	-@find $(BUILDDIR) -maxdepth 1 -type f -name '*.pygtex' -delete || true
+	-@rm -f $(PDFSIMPL) $(PDFAVANCE) || true
+
+
 
 distclean: clean
-	@echo "Removing generated PDF and build directory"
-	-@rm -f $(PDF) || true
-	-@rm -f $(TEX).pdf || true
+	@echo "Removing generated PDFs and build/release/minted directories"
+	-@rm -rf $(BUILDDIR) $(RELEASEDIR) $(MINTED) || true
+
 	-@rmdir $(OUTDIR) 2>/dev/null || true
 
 view: $(TEX).pdf

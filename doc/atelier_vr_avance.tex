@@ -1,0 +1,179 @@
+
+\documentclass[12pt]{article}
+\usepackage[french]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage[outputdir=build]{minted}
+\usemintedstyle{friendly}
+
+% --- Visuel sobre et cohérent avec la version simplifiée ---
+\definecolor{theoblue}{RGB}{23,113,181}
+\definecolor{codebg}{RGB}{250,250,250}
+\definecolor{coderule}{RGB}{200,200,200}
+\titleformat{\section}{\Large\bfseries\color{theoblue}}{\thesection}{0.5em}{}
+\titleformat{\subsection}{\large\bfseries\color{theoblue}}{\thesubsection}{0.5em}{}
+\setlist[itemize]{topsep=4pt,itemsep=4pt}
+\setlist[enumerate]{topsep=4pt,itemsep=4pt}
+\setminted{fontsize=\small,breaklines=true,linenos=false,autogobble=true,encoding=utf8,frame=single,bgcolor=codebg,rulecolor=coderule}
+
+\title{Atelier Découverte de la VR Interactive — Version avancée}
+\author{Théo AVRIL}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section{Objectifs}
+\begin{itemize}
+    \item Comprendre la structure de base d'un document HTML.
+    \item Découvrir A-Frame pour créer une scène VR dans le navigateur.
+    \item Ajouter de l'interactivité avec un composant JavaScript.
+    \item Explorer des primitives 3D, lumières, textures, modèles 3D et animations.
+\end{itemize}
+
+\section{Démarrage rapide}
+\subsection{Page HTML minimale}
+\begin{minted}{html}
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Atelier VR Interactif</title>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+  </head>
+  <body>
+    <!-- La scène VR sera définie ici -->
+  </body>
+</html>
+\end{minted}
+
+\subsection{Scène de base et objets}
+\begin{minted}{html}
+<body>
+  <a-scene>
+    <a-box position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9"
+           animation="property: rotation; to: 0 405 0; loop: true; dur: 4000"
+           change-color-on-click></a-box>
+
+    <a-sphere position="0 1.25 -5" radius="1.25" color="#EF2D5E"></a-sphere>
+    <a-cylinder position="1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D"></a-cylinder>
+
+    <a-plane position="0 0 -4" rotation="-90 0 0" width="4" height="4" color="#7BC8A4"></a-plane>
+    <a-sky color="#ECECEC"></a-sky>
+  </a-scene>
+</body>
+\end{minted}
+
+\subsection{Interactivité : composant personnalisé}
+\begin{minted}{html}
+<script>
+  AFRAME.registerComponent('change-color-on-click', {
+    init: function () {
+      this.el.addEventListener('click', function () {
+        var randomColor = '#' + Math.floor(Math.random() * 16777215).toString(16);
+        this.setAttribute('color', randomColor);
+      });
+    }
+  });
+</script>
+\end{minted}
+
+\section{Glossaire A-Frame (référence rapide)}
+\subsection{Formes et Objets 3D de Base}
+\begin{minted}{html}
+<!-- Formes primitives -->
+<a-box> <a-sphere> <a-cylinder> <a-plane> <a-cone> <a-torus>
+<a-ring> <a-circle> <a-triangle> <a-sky>
+\end{minted}
+
+\subsection{Attributs Communs}
+\begin{minted}{html}
+position="x y z"  rotation="x y z"  scale="x y z"
+color="#ff0000"   opacity="0.5"     visible="true/false"
+metalness="0.5"   roughness="0.5"
+width="2" height="1" depth="0.5" radius="1.5"
+\end{minted}
+
+\subsection{Images et Textures}
+\begin{minted}{html}
+<a-box src="chemin/vers/image.jpg"></a-box>
+<a-sky src="ciel.jpg"></a-sky>
+<a-image src="image.png" position="0 1.5 -2" width="2" height="1"></a-image>
+\end{minted}
+
+\subsection{Lumières}
+\begin{minted}{html}
+<a-light type="ambient" color="#BBB"></a-light>
+<a-light type="directional" position="0 1 1"></a-light>
+<a-light type="point" position="0 2 0"></a-light>
+<a-light type="spot" position="0 2 0" angle="45"></a-light>
+\end{minted}
+
+\subsection{Animations et Interactivité}
+\begin{minted}{html}
+<a-box position="0 1 -3"
+       animation="property: rotation; to: 0 360 0; loop: true; dur: 2000"></a-box>
+
+<!-- Attributs fréquents -->
+animation="property: position; to: 0 2 -3; dur: 2000; easing: easeInOutQuad; loop: true"
+\end{minted}
+
+\subsection{Événements et Curseurs}
+\begin{minted}{html}
+<a-camera><a-cursor color="#FFFFFF"></a-cursor></a-camera>
+<a-entity cursor="rayOrigin: mouse"></a-entity>
+
+<script>
+  document.querySelector('#monElement').addEventListener('click', function() {
+    this.setAttribute('color', 'red');
+  });
+</script>
+\end{minted}
+
+\subsection{Chargement de Modèles 3D}
+\begin{minted}{html}
+<a-entity gltf-model="url(modele.glb)" scale="0.5 0.5 0.5" position="0 0 -5"></a-entity>
+<a-entity obj-model="obj: url(modele.obj); mtl: url(modele.mtl)"></a-entity>
+\end{minted}
+
+\subsection{Environnement et Arrière-plan}
+\begin{minted}{html}
+<a-sky color="#6EBFF5"></a-sky>
+<a-sky src="ciel_360.jpg" rotation="0 -130 0"></a-sky>
+<a-scene fog="type: linear; color: #AAA; near: 0; far: 30"></a-scene>
+\end{minted}
+
+\section{Exemples de mini-projets}
+\begin{enumerate}
+    \item \textbf{Galerie d'images 3D} : disposer des \texttt{<a-image>} comme une expo.
+    \item \textbf{Système solaire} : \texttt{<a-sphere>} en orbite + animations.
+    \item \textbf{Jeu simple} : clic pour faire disparaître/déplacer des objets.
+    \item \textbf{Maison virtuelle} : combiner des primitives pour créer des pièces.
+\end{enumerate}
+
+\section{Conseils pratiques}
+\begin{itemize}
+    \item \textbf{Coordonnées} : unités en mètres. Axe Y vertical, X horizontal, Z profondeur (négatif = plus loin).
+    \item \textbf{Performances} : limiter les lumières et objets complexes.
+    \item \textbf{Mobile} : tester via un petit serveur local ou un service en ligne (Glitch).
+    \item \textbf{Organisation} : regrouper des éléments via \texttt{<a-entity id="...">}.
+    \item \textbf{Inspecteur} : \texttt{Ctrl+Alt+I} pour éditer visuellement la scène.
+\end{itemize}
+
+\section{Ressources}
+\begin{itemize}
+    \item Documentation officielle : \url{https://aframe.io/docs/}
+    \item Exemples : \url{https://aframe.io/examples/}
+    \item Composants : \url{https://www.npmjs.com/search?q=aframe-component}
+    \item Modèles 3D : Sketchfab, TurboSquid
+    \item Textures : Textures.com, Freepik
+    \item Éditeur en ligne : \url{https://glitch.com/~aframe}
+\end{itemize}
+
+\end{document}
