@@ -1,4 +1,3 @@
-
 \documentclass[12pt]{article}
 \usepackage[french]{babel}
 \usepackage[utf8]{inputenc}
@@ -9,10 +8,12 @@
 \usepackage{xcolor}
 \usepackage{titlesec}
 \usepackage{enumitem}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins,breakable}
 \usepackage[outputdir=build]{minted}
 \usemintedstyle{friendly}
 
-% --- Visuel sobre et cohérent avec la version simplifiée ---
+% --- Thème sobre pour la référence avancée ---
 \definecolor{theoblue}{RGB}{23,113,181}
 \definecolor{codebg}{RGB}{250,250,250}
 \definecolor{coderule}{RGB}{200,200,200}
@@ -22,6 +23,11 @@
 \setlist[enumerate]{topsep=4pt,itemsep=4pt}
 \setminted{fontsize=\small,breaklines=true,linenos=false,autogobble=true,encoding=utf8,frame=single,bgcolor=codebg,rulecolor=coderule}
 
+\newtcolorbox{concept}{enhanced,breakable,colback=white,colframe=theoblue!50!black,
+  boxrule=0.5pt,arc=1mm,left=4mm,right=4mm,top=1mm,bottom=1mm,title=\textbf{Concept}}
+\newtcolorbox{checkpoint}{enhanced,breakable,colback=white,colframe=theoblue!50!black,
+  boxrule=0.5pt,arc=1mm,left=4mm,right=4mm,top=1mm,bottom=1mm,title=\textbf{Checkpoint}}
+
 \title{Atelier Découverte de la VR Interactive — Version avancée}
 \author{Théo AVRIL}
 \date{\today}
@@ -29,13 +35,27 @@
 \begin{document}
 \maketitle
 
+% --- Contexte pédagogique bref ---
+\begin{concept}
+\textbf{Contexte.} A-Frame permet d’écrire de la \textbf{3D en HTML}. Une scène est faite d’\textit{entités} (\texttt{<a-entity>}) auxquelles on ajoute des \textit{composants} (attributs/comportements).
+Objectif de la séance : construire une scène \textbf{interactive} (clics, animations, assets) et comprendre la logique \textbf{ECS}.
+\end{concept}
+
 \section{Objectifs}
 \begin{itemize}
-    \item Comprendre la structure de base d'un document HTML.
-    \item Découvrir A-Frame pour créer une scène VR dans le navigateur.
-    \item Ajouter de l'interactivité avec un composant JavaScript.
-    \item Explorer des primitives 3D, lumières, textures, modèles 3D et animations.
+    \item Construire une scène VR et comprendre l'\textbf{approche entités--composants} d'A-Frame.
+    \item Créer des \textbf{composants personnalisés} et gérer les \textbf{événements}.
+    \item Utiliser \textbf{textures}, \textbf{lumières}, \textbf{modèles 3D} (GLB/OBJ), \textbf{animations}, \textbf{curseur/caméra}.
+    \item Appliquer de bonnes pratiques de \textbf{performance} et \textbf{organisation}.
 \end{itemize}
+
+\begin{concept}
+\textbf{ECS (Entity-Component System).} En A-Frame, tout est \textit{entité} (\texttt{<a-entity>}) qui reçoit des \textit{composants} (attributs) pour lui donner un comportement (\texttt{position}, \texttt{animation}, composants custom, etc.).
+\end{concept}
+
+\begin{concept}
+\textbf{Prérequis HTTP local et assets.} Servez la page en \textbf{HTTP local} (VS Code Live Server ou \texttt{python -m http.server}) : le chargement d'images/modèles peut échouer en \texttt{file://} (CORS). Placez vos fichiers (\texttt{.jpg}, \texttt{.glb}) dans le \textbf{même dossier} que \texttt{index.html}.
+\end{concept}
 
 \section{Démarrage rapide}
 \subsection{Page HTML minimale}
@@ -45,6 +65,7 @@
   <head>
     <meta charset="utf-8">
     <title>Atelier VR Interactif</title>
+    <!-- Version testée : 1.2.0 (ou supérieure) -->
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
   </head>
   <body>
@@ -53,61 +74,91 @@
 </html>
 \end{minted}
 
-\subsection{Scène de base et objets}
+\subsection{Scène de base + caméra et curseur (collez \emph{à l'intérieur} de votre \texttt{<body>} existant)}
 \begin{minted}{html}
-<body>
-  <a-scene>
-    <a-box position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9"
-           animation="property: rotation; to: 0 405 0; loop: true; dur: 4000"
-           change-color-on-click></a-box>
+<a-scene>
+  <a-entity position="0 1.6 0">
+    <a-camera>
+      <!-- Curseur au centre : clic souris / tap -->
+      <a-cursor></a-cursor>
+    </a-camera>
+  </a-entity>
 
-    <a-sphere position="0 1.25 -5" radius="1.25" color="#EF2D5E"></a-sphere>
-    <a-cylinder position="1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D"></a-cylinder>
+  <!-- Primitives -->
+  <a-box id="box1" position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9"
+         animation="property: rotation; to: 0 405 0; loop: true; dur: 4000"
+         change-color-on-click></a-box>
 
-    <a-plane position="0 0 -4" rotation="-90 0 0" width="4" height="4" color="#7BC8A4"></a-plane>
-    <a-sky color="#ECECEC"></a-sky>
-  </a-scene>
-</body>
+  <a-sphere position="0 1.25 -5" radius="1.25" color="#EF2D5E"></a-sphere>
+  <a-cylinder position="1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D"></a-cylinder>
+
+  <a-plane position="0 0 -4" rotation="-90 0 0" width="4" height="4" color="#7BC8A4"></a-plane>
+  <a-sky color="#ECECEC"></a-sky>
+
+  <!-- Interaction souris Desktop plug-and-play -->
+  <a-entity cursor="rayOrigin: mouse"></a-entity>
+</a-scene>
 \end{minted}
 
-\subsection{Interactivité : composant personnalisé}
+\begin{checkpoint}
+\textbf{Résultat attendu :} un cube bleu qui tourne, une sphère, un cylindre, un sol vert, un ciel gris.\\
+Si la page est vide, vérifiez l’URL A-Frame et regardez la console (F12).
+\end{checkpoint}
+
+\subsection{Interactivité : composants personnalisés}
 \begin{minted}{html}
 <script>
+  // Composant 1 : couleur aléatoire au clic (toujours 6 chiffres hex)
   AFRAME.registerComponent('change-color-on-click', {
+    schema: { },
     init: function () {
       this.el.addEventListener('click', function () {
-        var randomColor = '#' + Math.floor(Math.random() * 16777215).toString(16);
+        const n = Math.floor(Math.random() * 16777215);
+        const randomColor = '#' + n.toString(16).padStart(6, '0');
         this.setAttribute('color', randomColor);
+      });
+    }
+  });
+
+  // Composant 2 : déplacement aléatoire au clic (valeurs numériques)
+  AFRAME.registerComponent('jump-on-click', {
+    schema: { y: {type: 'number', default: 1} },
+    init: function () {
+      this.el.addEventListener('click', () => {
+        const rx = parseFloat((Math.random() * 4 - 2).toFixed(2));
+        this.el.setAttribute('position', {
+          x: rx, y: this.data.y, z: -3
+        });
       });
     }
   });
 </script>
 \end{minted}
 
-\section{Glossaire A-Frame (référence rapide)}
-\subsection{Formes et Objets 3D de Base}
+\begin{concept}
+\textbf{Pourquoi un composant ?} Un composant rend un comportement \textbf{réutilisable} : ajoutez \texttt{change-color-on-click} sur plusieurs objets sans recopier de code.
+\end{concept}
+
+\begin{checkpoint}
+\textbf{Résultat attendu :} le cube change de couleur au clic, et peut “sauter” si \texttt{jump-on-click} est appliqué.\\
+Sinon, vérifiez que le script est bien juste avant \texttt{</body>}.
+\end{checkpoint}
+
+\section{Référence A-Frame (sélection utile)}
+\subsection{Formes et objets 3D}
 \begin{minted}{html}
-<!-- Formes primitives -->
 <a-box> <a-sphere> <a-cylinder> <a-plane> <a-cone> <a-torus>
 <a-ring> <a-circle> <a-triangle> <a-sky>
 \end{minted}
 
-\subsection{Attributs Communs}
+\subsection{Attributs communs}
 \begin{minted}{html}
 position="x y z"  rotation="x y z"  scale="x y z"
 color="#ff0000"   opacity="0.5"     visible="true/false"
-metalness="0.5"   roughness="0.5"
-width="2" height="1" depth="0.5" radius="1.5"
+metalness="0.5"   roughness="0.5"   src="image.jpg"
 \end{minted}
 
-\subsection{Images et Textures}
-\begin{minted}{html}
-<a-box src="chemin/vers/image.jpg"></a-box>
-<a-sky src="ciel.jpg"></a-sky>
-<a-image src="image.png" position="0 1.5 -2" width="2" height="1"></a-image>
-\end{minted}
-
-\subsection{Lumières}
+\subsection{Lumières (rappels essentiels)}
 \begin{minted}{html}
 <a-light type="ambient" color="#BBB"></a-light>
 <a-light type="directional" position="0 1 1"></a-light>
@@ -115,60 +166,71 @@ width="2" height="1" depth="0.5" radius="1.5"
 <a-light type="spot" position="0 2 0" angle="45"></a-light>
 \end{minted}
 
-\subsection{Animations et Interactivité}
+\subsection{Animations}
 \begin{minted}{html}
 <a-box position="0 1 -3"
        animation="property: rotation; to: 0 360 0; loop: true; dur: 2000"></a-box>
-
-<!-- Attributs fréquents -->
-animation="property: position; to: 0 2 -3; dur: 2000; easing: easeInOutQuad; loop: true"
+<!-- Easing, delay, dir, loop, from/to, etc. -->
 \end{minted}
 
-\subsection{Événements et Curseurs}
+\subsection{Événements et curseur/souris}
 \begin{minted}{html}
-<a-camera><a-cursor color="#FFFFFF"></a-cursor></a-camera>
+<!-- Active un rayon "souris" pour cliquer sans casque -->
 <a-entity cursor="rayOrigin: mouse"></a-entity>
 
 <script>
-  document.querySelector('#monElement').addEventListener('click', function() {
-    this.setAttribute('color', 'red');
+  // S'assurer que les éléments existent avant d'ajouter des listeners
+  window.addEventListener('DOMContentLoaded', () => {
+    const el = document.querySelector('#box1');
+    if (!el) return;
+    el.addEventListener('mouseenter', () => el.setAttribute('scale', '1.1 1.1 1.1'));
+    el.addEventListener('mouseleave', () => el.setAttribute('scale', '1 1 1'));
   });
 </script>
 \end{minted}
 
-\subsection{Chargement de Modèles 3D}
+\subsection{Textures et images}
 \begin{minted}{html}
-<a-entity gltf-model="url(modele.glb)" scale="0.5 0.5 0.5" position="0 0 -5"></a-entity>
-<a-entity obj-model="obj: url(modele.obj); mtl: url(modele.mtl)"></a-entity>
+<a-assets>
+  <img id="brick" src="brick.jpg">
+</a-assets>
+<a-box src="#brick" width="2" height="1" depth="1"></a-box>
 \end{minted}
 
-\subsection{Environnement et Arrière-plan}
+\subsection{Chargement de modèles 3D}
 \begin{minted}{html}
-<a-sky color="#6EBFF5"></a-sky>
-<a-sky src="ciel_360.jpg" rotation="0 -130 0"></a-sky>
-<a-scene fog="type: linear; color: #AAA; near: 0; far: 30"></a-scene>
+<a-assets>
+  <a-asset-item id="tree" src="modele.glb"></a-asset-item>
+</a-assets>
+<a-entity gltf-model="#tree" scale="0.5 0.5 0.5" position="0 0 -5"></a-entity>
 \end{minted}
 
-\section{Exemples de mini-projets}
-\begin{enumerate}
-    \item \textbf{Galerie d'images 3D} : disposer des \texttt{<a-image>} comme une expo.
-    \item \textbf{Système solaire} : \texttt{<a-sphere>} en orbite + animations.
-    \item \textbf{Jeu simple} : clic pour faire disparaître/déplacer des objets.
-    \item \textbf{Maison virtuelle} : combiner des primitives pour créer des pièces.
-\end{enumerate}
-
-\section{Conseils pratiques}
+\section{Bonnes pratiques et performances}
 \begin{itemize}
-    \item \textbf{Coordonnées} : unités en mètres. Axe Y vertical, X horizontal, Z profondeur (négatif = plus loin).
-    \item \textbf{Performances} : limiter les lumières et objets complexes.
-    \item \textbf{Mobile} : tester via un petit serveur local ou un service en ligne (Glitch).
-    \item \textbf{Organisation} : regrouper des éléments via \texttt{<a-entity id="...">}.
-    \item \textbf{Inspecteur} : \texttt{Ctrl+Alt+I} pour éditer visuellement la scène.
+  \item Limiter les lumières dynamiques et préférer des \textit{materials} simples.
+  \item Réduire le poids des modèles (GLB) et textures (JPEG/PNG optimisés).
+  \item Grouper les entités et nommer via \texttt{id} pour les manipulations.
+  \item Tester avec l'\textbf{inspecteur} (\texttt{Ctrl+Alt+I}) pour ajuster visuellement.
+\end{itemize}
+
+\section{Mini-projets guidés}
+\subsection*{1. Galerie 3D}
+Démarre en dupliquant \texttt{<a-image>} (change \texttt{src} et \texttt{position}); au clic, agrandis puis reviens.
+\subsection*{2. Système solaire}
+\texttt{<a-sphere>} pour planètes + animations d'orbite; lumière \texttt{point} au centre.
+\subsection*{3. Jeu "attrape-la-boîte"}
+Au clic, la boîte se déplace au hasard; compte le score dans une \texttt{<a-text>} simple.
+
+\section{Dépannage (FAQ rapide)}
+\begin{itemize}
+  \item \textbf{Page vide} : vérifier l'URL A-Frame; regarder la console (F12).
+  \item \textbf{Pas de clic} : le composant est-il chargé \emph{avant} \texttt{</body>} ? Activer \texttt{cursor="rayOrigin: mouse"}.
+  \item \textbf{Modèle non visible} : vérifier chemin \texttt{src}, \texttt{scale} trop petit, ou erreurs CORS; servir en HTTP local.
 \end{itemize}
 
 \section{Ressources}
 \begin{itemize}
-    \item Documentation officielle : \url{https://aframe.io/docs/}
+    \item Documentation : \url{https://aframe.io/docs/}
     \item Exemples : \url{https://aframe.io/examples/}
     \item Composants : \url{https://www.npmjs.com/search?q=aframe-component}
     \item Modèles 3D : Sketchfab, TurboSquid

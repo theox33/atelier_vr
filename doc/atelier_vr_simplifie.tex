@@ -1,4 +1,3 @@
-
 \documentclass[12pt]{article}
 \usepackage[french]{babel}
 \usepackage[utf8]{inputenc}
@@ -9,19 +8,32 @@
 \usepackage{xcolor}
 \usepackage{titlesec}
 \usepackage{enumitem}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins,breakable}
 \usepackage[outputdir=build]{minted}
+\usepackage{amssymb}
 \usemintedstyle{friendly}
 
-% --- Visuel léger ---
+% --- Thème visuel léger et pédagogique (version atelier 30 min) ---
 \definecolor{theoblue}{RGB}{23,113,181}
 \definecolor{lightblue}{RGB}{239,247,254}
 \definecolor{codebg}{RGB}{250,250,250}
 \definecolor{coderule}{RGB}{200,200,200}
+
 \titleformat{\section}{\Large\bfseries\color{theoblue}}{\thesection}{0.5em}{}
 \titleformat{\subsection}{\large\bfseries\color{theoblue}}{\thesubsection}{0.5em}{}
 \setlist[itemize]{topsep=4pt,itemsep=4pt}
 \setlist[enumerate]{topsep=4pt,itemsep=4pt}
 \setminted{fontsize=\small,breaklines=true,linenos=false,autogobble=true,encoding=utf8,frame=single,bgcolor=codebg,rulecolor=coderule}
+
+\newtcolorbox{objectifbox}{enhanced,breakable,colback=lightblue,colframe=theoblue!70!black,
+  boxrule=0.6pt,arc=1mm,left=4mm,right=4mm,top=2mm,bottom=2mm}
+\newtcolorbox{checkpoint}{enhanced,breakable,colback=white,colframe=theoblue!50!black,
+  boxrule=0.5pt,arc=1mm,left=4mm,right=4mm,top=1mm,bottom=1mm,title=\textbf{\checkmark\;Checkpoint}}
+\newtcolorbox{tip}{enhanced,breakable,colback=white,colframe=theoblue!30!black,
+  boxrule=0.5pt,arc=1mm,left=4mm,right=4mm,top=1mm,bottom=1mm,title=\textbf{Astuce}}
+\newtcolorbox{helpbox}{enhanced,breakable,colback=white,colframe=red!50!black,
+  boxrule=0.5pt,arc=1mm,left=4mm,right=4mm,top=1mm,bottom=1mm,title=\textbf{Dépannage rapide}}
 
 \title{Atelier Découverte de la VR Interactive}
 \author{Théo AVRIL}
@@ -30,15 +42,15 @@
 \begin{document}
 \maketitle
 
-\section*{Ce que tu vas faire (30 minutes)}
-\begin{itemize}
-  \item Créer une \textbf{page web} minimale.
-  \item Ajouter une \textbf{scène 3D} avec \textbf{A-Frame}.
-  \item Rendre un cube \textbf{interactif} (il change de couleur au clic).
-\end{itemize}
+\begin{objectifbox}
+\textbf{Durée : 30 minutes.}\\
+Tu vas : (1) créer une \textbf{page web}, (2) ajouter une \textbf{scène 3D} avec \textbf{A-Frame}, (3) rendre un cube \textbf{interactif} (il change de couleur au clic).\\[2pt]
+\textit{Objectif final : voir et manipuler une petite scène 3D dans ton navigateur.}\\[4pt]
+\textbf{A-Frame en 2 phrases :} c’est une bibliothèque JS qui permet d’écrire de la \textbf{3D en HTML}. Chaque objet de la scène est une balise : \texttt{<a-box>} (cube), \texttt{<a-sphere>} (sphère), etc.
+\end{objectifbox}
 
 \section*{Matériel}
-Un navigateur moderne (Chrome/Firefox) et un éditeur de texte (VS Code, etc.).
+Un \textbf{navigateur moderne} (Chrome/Firefox) et un \textbf{éditeur de texte} (VS Code, etc.).
 
 \section{Étape 1 — Lance ta page web (5 min)}
 Crée un fichier \texttt{index.html}, et colle le code suivant :
@@ -58,31 +70,40 @@ Crée un fichier \texttt{index.html}, et colle le code suivant :
 </html>
 \end{minted}
 
-\textit{Ouvre ce fichier dans ton navigateur : tu as une page web prête à accueillir la 3D.}
+\begin{checkpoint}
+Ouvre \texttt{index.html} dans ton navigateur. Si la page s'affiche (même blanche), c'est bon.
+\end{checkpoint}
 
 \section{Étape 2 — Ajoute une scène 3D (10 min)}
-Ajoute le contenu suivant dans la balise \texttt{<body>} :
+\textbf{Colle le bloc ci-dessous \emph{à l'intérieur} de la balise \texttt{<body>} (ne duplique pas \texttt{<body>}).}
 
 \begin{minted}{html}
-<body>
-  <a-scene>
-    <!-- Cube interactif (on ajoutera le script ensuite) -->
-    <a-box position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9"
-           animation="property: rotation; to: 0 405 0; loop: true; dur: 4000"
-           change-color-on-click></a-box>
+<a-scene>
+  <!-- Cube interactif (on ajoutera le script ensuite) -->
+  <a-box id="box1" position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9"
+         animation="property: rotation; to: 0 405 0; loop: true; dur: 4000"
+         change-color-on-click></a-box>
 
-    <!-- Autres objets -->
-    <a-sphere position="0 1.25 -5" radius="1.25" color="#EF2D5E"></a-sphere>
-    <a-cylinder position="1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D"></a-cylinder>
+  <!-- Autres objets -->
+  <a-sphere position="0 1.25 -5" radius="1.25" color="#EF2D5E"></a-sphere>
+  <a-cylinder position="1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D"></a-cylinder>
 
-    <!-- Sol et ciel -->
-    <a-plane position="0 0 -4" rotation="-90 0 0" width="4" height="4" color="#7BC8A4"></a-plane>
-    <a-sky color="#ECECEC"></a-sky>
-  </a-scene>
-</body>
+  <!-- Sol et ciel -->
+  <a-plane position="0 0 -4" rotation="-90 0 0" width="4" height="4" color="#7BC8A4"></a-plane>
+  <a-sky color="#ECECEC"></a-sky>
+
+  <!-- Interaction souris Desktop -->
+  <a-entity cursor="rayOrigin: mouse"></a-entity>
+</a-scene>
 \end{minted}
 
-\textbf{À savoir :} \texttt{<a-scene>} crée la scène VR; \texttt{<a-box>}, \texttt{<a-sphere>}, \texttt{<a-cylinder>} sont des objets 3D prêts à l'emploi.
+\begin{tip}
+\texttt{<a-scene>} crée la scène VR. Les balises \texttt{<a-box>}, \texttt{<a-sphere>}, \texttt{<a-cylinder>} sont des objets 3D prêts à l'emploi.
+\end{tip}
+
+\begin{checkpoint}
+Résultat attendu : une \textbf{boîte qui tourne}, une sphère, un cylindre, un sol vert et un ciel gris.
+\end{checkpoint}
 
 \section{Étape 3 — Rends ton cube interactif (10 min)}
 Colle ce script juste avant \texttt{</body>} :
@@ -93,8 +114,9 @@ Colle ce script juste avant \texttt{</body>} :
   AFRAME.registerComponent('change-color-on-click', {
     init: function () {
       this.el.addEventListener('click', function () {
-        // Couleur hex aléatoire
-        var randomColor = '#' + Math.floor(Math.random() * 16777215).toString(16);
+        // Couleur hex aléatoire fiable (6 chiffres)
+        const n = Math.floor(Math.random() * 16777215);
+        const randomColor = '#' + n.toString(16).padStart(6, '0');
         this.setAttribute('color', randomColor);
       });
     }
@@ -102,14 +124,16 @@ Colle ce script juste avant \texttt{</body>} :
 </script>
 \end{minted}
 
-\textbf{Teste :} clique sur le cube — il tourne et change de couleur.
+\begin{checkpoint}
+Teste : clique sur la boîte. \textbf{Résultat attendu :} la \textbf{couleur change}.
+\end{checkpoint}
 
-\section{Bonus (5 min)}
-Si tu as fini avant les autres, ajoute une autre interaction : déplacer le cube au clic :
+\section*{Bonus (5 min)}
+Déplacer la boîte au clic (valeurs numériques) :
 
 \begin{minted}{html}
 this.setAttribute('position', {
-  x: (Math.random() * 4 - 2).toFixed(2),
+  x: parseFloat((Math.random() * 4 - 2).toFixed(2)),
   y: 1,
   z: -3
 });
@@ -117,17 +141,18 @@ this.setAttribute('position', {
 
 \section*{Aide rapide}
 \begin{itemize}
-  \item \texttt{position="x y z"} déplace un objet.
+  \item \texttt{position="x y z"} déplace un objet (\(x\)=gauche/droite, \(y\)=haut/bas, \(z\)=profondeur).
   \item \texttt{rotation="x y z"} oriente un objet.
   \item \texttt{color="\#RRGGBB"} change la couleur.
-  \item L'inspecteur A-Frame s'ouvre avec \texttt{Ctrl+Alt+I}.
+  \item Inspecteur visuel : \texttt{Ctrl+Alt+I}.
 \end{itemize}
 
-\section*{Pour aller plus loin}
-\begin{itemize}
-  \item Documentation officielle : \url{https://aframe.io/docs/}
-  \item Exemples : \url{https://aframe.io/examples/}
-  \item Éditeur en ligne : \url{https://glitch.com/~aframe}
-\end{itemize}
+\begin{helpbox}
+\textbf{Rien ne s'affiche ?} Vérifie l'URL d'A-Frame, sauvegarde le fichier, et rafraîchis la page.\\
+\textbf{Pas d'interaction ?} Assure-toi d'avoir ajouté \texttt{cursor="rayOrigin: mouse"} dans la scène et que le script est avant \texttt{</body>}.
+\end{helpbox}
+
+\section*{Pour aller plus loin (optionnel)}
+Exemples et docs : \url{https://aframe.io/examples/} \;|\; \url{https://aframe.io/docs/} \;|\; Éditeur en ligne : \url{https://glitch.com/~aframe}
 
 \end{document}

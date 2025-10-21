@@ -56,7 +56,6 @@ clean:
 	-@find $(BUILDDIR) -type f \( -name '*.aux' -o -name '*.log' -o -name '*.fls' -o -name '*.fdb_latexmk' -o -name '*.out' -o -name '*.toc' -o -name '*.synctex.gz' -o -name '*.nav' -o -name '*.snm' \) -delete || true
 	-@rm -rf $(BUILDDIR)/_minted-* || true
 	-@find $(BUILDDIR) -maxdepth 1 -type f -name '*.pygtex' -delete || true
-	-@rm -f $(PDFSIMPL) $(PDFAVANCE) || true
 
 
 
